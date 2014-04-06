@@ -8,6 +8,7 @@ import android.util.Pair;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.thoughtcrime.securesms.crypto.DecryptingQueue;
+import org.thoughtcrime.securesms.crypto.IdentityKeyUtil;
 import org.thoughtcrime.securesms.crypto.KeyExchangeProcessor;
 import org.thoughtcrime.securesms.crypto.KeyExchangeProcessorV2;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -33,11 +34,15 @@ import org.whispersystems.textsecure.crypto.protocol.PreKeyWhisperMessage;
 import org.whispersystems.textsecure.push.IncomingPushMessage;
 import org.whispersystems.textsecure.push.PushMessageProtos.PushMessageContent;
 import org.whispersystems.textsecure.storage.InvalidKeyIdException;
+import org.whispersystems.textsecure.storage.PreKeyRecord;
 import org.whispersystems.textsecure.storage.RecipientDevice;
 import org.whispersystems.textsecure.storage.Session;
 import org.whispersystems.textsecure.util.Base64;
 
+import org.whispersystems.textsecure.util.Hex;
 import ws.com.google.android.mms.MmsException;
+
+import java.io.FileNotFoundException;
 
 import static org.whispersystems.textsecure.push.PushMessageProtos.PushMessageContent.GroupContext.Type;
 
@@ -117,7 +122,20 @@ public class PushReceiver {
       KeyExchangeProcessorV2 processor       = new KeyExchangeProcessorV2(context, masterSecret, recipientDevice);
       PreKeyWhisperMessage   preKeyExchange  = new PreKeyWhisperMessage(message.getBody());
 
-      if (processor.isTrusted(preKeyExchange)) {
+        try {
+        PreKeyRecord thinggy = new PreKeyRecord(context, masterSecret, preKeyExchange.getPreKeyId());
+    Log.e("LOGGGGGGGG", "createNewKeyExchangeFromRemote: {\n" +
+            "messageHex: hexToArrayBuffer('" + Hex.toStringCondensed(message.getBody()) + "'),\n" +
+            "ourPreKey: hexToArrayBuffer('" + Hex.toStringCondensed(thinggy.getKeyPair().getPrivateKey().serialize()) + "'),\n" +
+              "ourIdentityKey: hexToArrayBuffer('" + Hex.toStringCondensed(IdentityKeyUtil.getIdentityKeyPair(context, masterSecret,
+                                                                        thinggy.getKeyPair().getPublicKey().getType()).getPrivateKey().serialize()) + "')\n" +
+            "}");
+        } catch (Exception e) {
+     Log.e("LOGGGGGGGG", "receivedDuplicateKeyExchange: {\n" +
+            "messageHex: hexToArrayBuffer('" + Hex.toStringCondensed(message.getBody()) + "')\n" +
+            "}");
+        }
+            if (processor.isTrusted(preKeyExchange)) {
         processor.processKeyExchangeMessage(preKeyExchange);
 
         IncomingPushMessage bundledMessage = message.withBody(preKeyExchange.getWhisperMessage().serialize());

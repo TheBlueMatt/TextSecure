@@ -28,6 +28,7 @@ import org.whispersystems.textsecure.storage.PreKeyRecord;
 import org.whispersystems.textsecure.storage.RecipientDevice;
 import org.whispersystems.textsecure.storage.Session;
 import org.whispersystems.textsecure.storage.SessionRecordV2;
+import org.whispersystems.textsecure.util.Hex;
 import org.whispersystems.textsecure.util.Medium;
 
 /**
@@ -142,6 +143,15 @@ public class KeyExchangeProcessorV2 extends KeyExchangeProcessor {
 
     if (sessionRecord.getSessionState().getNeedsRefresh()) sessionRecord.archiveCurrentState();
     else                                                   sessionRecord.clear();
+
+    Log.e("LOGGGGGGGG", "createNewKeyExchangeFromLocal: {\n" +
+            "ourBaseKey: hexToArrayBuffer('" + Hex.toStringCondensed(ourBaseKey.getPrivateKey().serialize()) + "'),\n" +
+            "ourEphemeralKey: hexToArrayBuffer('" + Hex.toStringCondensed(ourEphemeralKey.getPrivateKey().serialize()) + "'),\n" +
+            "theirBaseKey: hexToArrayBuffer('" + Hex.toStringCondensed(theirBaseKey.serialize()) + "'),\n" +
+              "theirIdentityKey: hexToArrayBuffer('" + Hex.toStringCondensed(theirIdentityKey.serialize()) + "'),\n" +
+              "ourIdentityKey: hexToArrayBuffer('" + Hex.toStringCondensed(ourIdentityKey.getPrivateKey().serialize()) + "'),\n" +
+            "}");
+
 
     RatchetingSession.initializeSession(sessionRecord.getSessionState(),
                                         ourBaseKey, theirBaseKey, ourEphemeralKey,

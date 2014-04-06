@@ -17,6 +17,7 @@ import org.whispersystems.textsecure.storage.RecipientDevice;
 import org.whispersystems.textsecure.storage.SessionRecordV2;
 import org.whispersystems.textsecure.storage.SessionState;
 import org.whispersystems.textsecure.util.Conversions;
+import org.whispersystems.textsecure.util.Hex;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -58,6 +59,10 @@ public class SessionCipherV2 extends SessionCipher {
       CiphertextMessage ciphertextMessage = new WhisperMessageV2(messageKeys.getMacKey(),
                                                                  senderEphemeral, chainKey.getIndex(),
                                                                  previousCounter, ciphertextBody);
+        Log.e("LOGGGGGGGG", "encrypt: {\n" +
+                "plaintext: hexToArrayBuffer('" + Hex.toStringCondensed(paddedMessage) + "'),\n" +
+                "counter: " + chainKey.getIndex() +
+                "}");
 
       if (sessionState.hasPendingPreKey()) {
         Pair<Integer, ECPublicKey> pendingPreKey       = sessionState.getPendingPreKey();
@@ -121,6 +126,10 @@ public class SessionCipherV2 extends SessionCipher {
     ECPublicKey      theirEphemeral    = ciphertextMessage.getSenderEphemeral();
     int              counter           = ciphertextMessage.getCounter();
     ChainKey         chainKey          = getOrCreateChainKey(sessionState, theirEphemeral);
+      Log.e("LOGGGGGGGG", "receiveMessage: {\n" +
+              "newEphemeralKey: hexToArrayBuffer('" + Hex.toStringCondensed(sessionState.getSenderEphemeralPair().getPrivateKey().serialize()) + "'),\n" +
+              "message: hexToArrayBuffer('" + Hex.toStringCondensed(decodedMessage) + "')\n" +
+              "}");
     MessageKeys      messageKeys       = getOrCreateMessageKeys(sessionState, theirEphemeral,
                                                                 chainKey, counter);
 
