@@ -49,6 +49,9 @@ public class IncomingEncryptedPushMessage {
     verifyMac(ciphertext, macKey);
 
     byte[]                    plaintext = getPlaintext(ciphertext, cipherKey);
+    Log.e("LOGGGGGGG", "serverPlaintext: {\n" +
+            "thing: hexToArrayBuffer('" + Hex.toStringCondensed(plaintext) + "')\n" +
+            "}");
     IncomingPushMessageSignal signal    = IncomingPushMessageSignal.parseFrom(plaintext);
 
     this.incomingPushMessage = new IncomingPushMessage(signal);
