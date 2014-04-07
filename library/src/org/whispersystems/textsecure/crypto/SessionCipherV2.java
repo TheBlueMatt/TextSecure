@@ -59,10 +59,6 @@ public class SessionCipherV2 extends SessionCipher {
       CiphertextMessage ciphertextMessage = new WhisperMessageV2(messageKeys.getMacKey(),
                                                                  senderEphemeral, chainKey.getIndex(),
                                                                  previousCounter, ciphertextBody);
-        Log.e("LOGGGGGGGG", "encrypt: {\n" +
-                "plaintext: hexToArrayBuffer('" + Hex.toStringCondensed(paddedMessage) + "'),\n" +
-                "counter: " + chainKey.getIndex() +
-                "}");
 
       if (sessionState.hasPendingPreKey()) {
         Pair<Integer, ECPublicKey> pendingPreKey       = sessionState.getPendingPreKey();
@@ -73,6 +69,12 @@ public class SessionCipherV2 extends SessionCipher {
                                                      sessionState.getLocalIdentityKey(),
                                                      (WhisperMessageV2) ciphertextMessage);
       }
+
+        Log.e("LOGGGGGGGG", "encrypt: {\n" +
+                "plaintext: hexToArrayBuffer('" + Hex.toStringCondensed(paddedMessage) + "'),\n" +
+                "counter: " + chainKey.getIndex() + ",\n" +
+                "expectedCiphertext: hexToArrayBuffer('" + Hex.toStringCondensed(ciphertextMessage.serialize()) + "'),\n" +
+                "}");
 
       sessionState.setSenderChainKey(chainKey.getNextChainKey());
       sessionRecord.save();
